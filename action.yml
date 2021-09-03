@@ -1,0 +1,35 @@
+name: GitHub Organization Git Audit Log Action
+
+inputs:
+  token:
+    description: 'A Personal Access token with repo and read:org scope'
+    required: true
+  org:
+    description: 'Custom GitHub organization to retrieve data for'
+    default: ''
+    required: false
+  days:
+    description: 'Amount of days in the past to collect Git audit log data for (max 7 days)'
+    default: '7'
+    required: false
+  sort:
+    description: 'Select sorting column'
+    # gitClone, gitPush, gitFetch
+    default: 'gitClone'
+    required: false
+  committer-name:
+    description: 'The name of the committer that will appear in the Git history'
+    default: 'github-actions'
+    required: false
+  committer-email:
+    description: 'The committer email that will appear in the Git history'
+    default: 'github-actions@github.com'
+    required: false
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'list'
+  color: 'green'
