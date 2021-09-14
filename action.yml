@@ -25,6 +25,12 @@ inputs:
     description: 'The committer email that will appear in the Git history'
     default: 'github-actions@github.com'
     required: false
+  fromdate:
+    description: 'The date from which to start collecting data'
+    required: false
+  todate:
+    description: 'The date to which to stop collecting data'
+    required: false
 
 runs:
   using: 'node12'
