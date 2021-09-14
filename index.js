@@ -9,27 +9,55 @@ const octokit = github.getOctokit(token)
 const eventPayload = require(process.env.GITHUB_EVENT_PATH)
 const org = core.getInput('org', {required: false}) || eventPayload.organization.login
 
+// Get epoch time in ms
 const days = core.getInput('days', {required: false}) || '7'
-const fromDate = Date.now() - days * 24 * 60 * 60 * 1000
+const intervalDays = Date.now() - days * 24 * 60 * 60 * 1000
 
+const fromdate = core.getInput('fromdate', {required: false}) || ''
+const fromDateEpoch = Math.floor(new Date(fromdate))
+
+const todate = core.getInput('todate', {required: false}) || ''
+const toDateEpoch = Math.floor(new Date(todate))
+
+// Verify date against regex
+const regex = '([0-9]{4}-[0-9]{2}-[0-9]{2})'
+const flags = 'i'
+const re = new RegExp(regex, flags)
+
+let columnDate
+let fileDate
+
+  // Retrieve Git audit log data and filter by date range
 ;(async () => {
   try {
     const dataArray = []
     const gitArray = []
+    let logDate
 
-    // Retrieve Git audit-log data
     const data = await octokit.paginate('GET /orgs/{org}/audit-log', {
       org: org,
       include: 'git'
     })
 
-    console.log(`Retrieve Git audit log for ${days} days starting at ${new Date(fromDate)}`)
-
     data.forEach((element) => {
-      if (element['@timestamp'] >= fromDate) {
-        dataArray.push(element)
+      if (re.test(fromdate, todate) !== true) {
+        if (element['@timestamp'] >= intervalDays) {
+          dataArray.push(element)
+        }
+        logDate = `the last ${days} days`
+        fileDate = `${days}-days`
+        columnDate = `<${days} days`
+      } else {
+        if (element['@timestamp'] >= fromDateEpoch && element['@timestamp'] <= toDateEpoch) {
+          dataArray.push(element)
+        }
+        logDate = `${fromdate} to ${todate}`
+        fileDate = `${fromdate}-to-${todate}`
+        columnDate = logDate
       }
     })
+
+    console.log(`Retrieve Git audit log for ${logDate}`)
 
     // Sum and sort Git audit log data per repository
     const gitSum = dataArray.reduce((res, {repo, action}) => {
@@ -68,9 +96,9 @@ async function pushAuditReport(gitArray) {
     // Set sorting settings and add header to array
     const columns = {
       repoName: 'Repository',
-      gitClone: `Git clones (<${days} days)`,
-      gitPush: `Git pushes (<${days} days)`,
-      gitFetch: `Git fetches (<${days} days)`
+      gitClone: `Git clones (${columnDate})`,
+      gitPush: `Git pushes (${columnDate})`,
+      gitFetch: `Git fetches (${columnDate})`
     }
     const sortColumn = core.getInput('sort', {required: false}) || 'gitClone'
     const sortArray = arraySort(gitArray, sortColumn, {reverse: true})
@@ -80,7 +108,7 @@ async function pushAuditReport(gitArray) {
     const csv = stringify(sortArray)
 
     // Prepare path/filename, repo/org context and commit name/email variables
-    const reportPath = `reports/${org}-${new Date().toISOString().substring(0, 19) + 'Z'}-${days}days.csv`
+    const reportPath = `reports/${org}-${new Date().toISOString().substring(0, 19) + 'Z'}-${fileDate}.csv`
     const committerName = core.getInput('committer-name', {required: false}) || 'github-actions'
     const committerEmail = core.getInput('committer-email', {required: false}) || 'github-actions@github.com'
     const {owner, repo} = github.context.repo
