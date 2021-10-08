@@ -1,6 +1,6 @@
 {
-  "name": "github-org-git-audit-log-action",
-  "version": "1.1.0",
+  "name": "github-org-git-audit-log-for-repos-action",
+  "version": "1.1.1",
   "description": "A GitHub Action to generate a report that contains the total amount of Git clones, pushes and fetches per repository for a set interval",
   "author": {
     "name": "GitHub Professional Services",
@@ -11,11 +11,11 @@
     {
       "name": "Nick Nagel",
       "email": "nicklegan@github.com",
-      "url": "https://github.com/stoe"
+      "url": "https://github.com/nicklegan"
     }
   ],
   "license": "MIT",
-  "repository": "github:nicklegan/github-org-git-audit-log-action",
+  "repository": "github:nicklegan/github-org-git-audit-log-for-repos-action",
   "engines": {
     "node": ">=14",
     "npm": ">=7"
@@ -25,7 +25,7 @@
     "build": "npx @vercel/ncc build index.js --out dist --license licenses.txt --quiet --minify"
   },
   "dependencies": {
-    "@actions/core": "^1.5.0",
+    "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
     "array-sort": "^1.0.0",
     "csv-stringify": "^5.6.5"

@@ -1,4 +1,4 @@
-name: GitHub Organization Git Audit Log Action
+name: GitHub Organization Git Audit Log for Repos Action
 
 inputs:
   token:
