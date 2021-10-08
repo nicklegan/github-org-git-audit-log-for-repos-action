@@ -1,4 +1,4 @@
-# GitHub Organization Git Audit Log Action
+# GitHub Organization Git Audit Log for Repos Report Action
 
 > A GitHub Action to generate a report that contains the total amount of Git clones, pushes and fetches per repository for a set interval.
 
@@ -7,9 +7,18 @@
 The example [workflow](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions) below runs on a weekly [schedule](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events) and can be executed manually using a [workflow_dispatch](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#manual-events) event.
 
 ```yml
-name: Git Audit Log Report
+name: Git Audit Log for Repos Report
 
 on:
+  schedule:
+    # Runs on every Sunday at 00:00 UTC
+    #
+    #        ┌────────────── minute
+    #        │ ┌──────────── hour
+    #        │ │ ┌────────── day (month)
+    #        │ │ │ ┌──────── month
+    #        │ │ │ │ ┌────── day (week)
+    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       fromdate:
@@ -18,19 +27,17 @@ on:
       todate:
         description: 'Optional interval end date within the last 7 days (format: yyyy-mm-dd)'
         required: false # Skipped if workflow dispatch input is not provided
-  schedule:
-    - cron: '0 0 * * 0' # Runs every Sunday at 00:00
 
 jobs:
-  git-audit-log-report:
+  git-audit-log-for-repos-report:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get Git Audit Log
-        uses: nicklegan/github-org-git-audit-log-action@v1.1.0
+      - name: Get Git Audit Log for Repos
+        uses: nicklegan/github-org-git-audit-log-for-repos-action@v1.1.1
         with:
           token: ${{ secrets.ORG_TOKEN }}
           fromdate: ${{ github.event.inputs.fromdate }} # Used for workflow dispatch input
@@ -55,7 +62,7 @@ jobs:
 | :---------------- | :------------------------------------------------------------ | :-------------------------- | :------------------------------- | :------- |
 | `org`             | Organization different than workflow context                  |                             |                                  | `false`  |
 | `days`            | Amount of days in the past to collect data for (max 7 days)   | `7`                         |                                  | `false`  |
-| `sort`            | Column used to sort the acquired contribution data            | `gitClone`                  | `gitClone`, `gitPush` `gitFetch` | `false`  |
+| `sort`            | Column used to sort the acquired audit log data               | `gitClone`                  | `gitClone`, `gitPush` `gitFetch` | `false`  |
 | `committer-name`  | The name of the committer that will appear in the Git history | `github-actions`            |                                  | `false`  |
 | `committer-email` | The committer email that will appear in the Git history       | `github-actions@github.com` |                                  | `false`  |
 
@@ -64,7 +71,7 @@ jobs:
 ## Workflow dispatch inputs
 
 The additional option to retrieve Git audit log events using a custom date interval.
-If the below fields are left empty during [workflow dispatch input](https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/), the default interval option of set days from the current date, configured in `main.yml` will be used instead.
+If the below fields are left empty during [workflow dispatch input](https://github.blog/changelog/2020-07-06-github-actions-manual-triggers-with-workflow_dispatch/), the default interval option of set days from the current date, configured in **main.yml** will be used instead.
 
 | Name                                                  | Value                                   | Required |
 | :---------------------------------------------------- | :-------------------------------------- | :------- |
@@ -82,4 +89,4 @@ The results of all except the first column will be the sum of [Git audit log eve
 | Git pushes  | Sum of Git pushes for a set interval per repository  |
 | Git fetches | Sum of Git fetches for a set interval per repository |
 
-A CSV report file be saved in the repository `reports` folder using the following naming format: `organization-date-interval.csv`.
+A CSV report file be saved in the repository **reports** folder using the following naming format: **`organization`-`date`-`interval`.csv**.

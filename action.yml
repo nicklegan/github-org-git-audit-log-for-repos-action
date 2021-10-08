@@ -1,4 +1,5 @@
-name: GitHub Organization Git Audit Log Action
+name: GitHub Organization Git Audit Log for Repos Report Action
+description: 'An Action to generate a report that contains the total of Git clones, pushes and fetches per repository for a set interval.'
 
 inputs:
   token:
@@ -38,4 +39,4 @@ runs:
 
 branding:
   icon: 'list'
-  color: 'green'
+  color: 'blue'
